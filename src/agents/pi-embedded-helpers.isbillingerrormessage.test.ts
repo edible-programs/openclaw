@@ -28,4 +28,17 @@ describe("isBillingErrorMessage", () => {
     expect(isBillingErrorMessage("invalid api key")).toBe(false);
     expect(isBillingErrorMessage("context length exceeded")).toBe(false);
   });
+
+  it("does not misclassify local process termination as billing", () => {
+    const samples = [
+      "Command exited with code 141",
+      "Process exited with code 137 (SIGKILL)",
+      "exec failed: write EPIPE",
+      "Command terminated early (SIGPIPE)",
+      "Killed session briny-orbit",
+    ];
+    for (const sample of samples) {
+      expect(isBillingErrorMessage(sample)).toBe(false);
+    }
+  });
 });

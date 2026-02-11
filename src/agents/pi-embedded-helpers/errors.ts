@@ -528,9 +528,33 @@ export function isTimeoutErrorMessage(raw: string): boolean {
   return matchesErrorPatterns(raw, ERROR_PATTERNS.timeout);
 }
 
+function isLikelyLocalProcessTerminationError(raw: string): boolean {
+  if (!raw) {
+    return false;
+  }
+  const value = raw.toLowerCase();
+  return (
+    value.includes("sigpipe") ||
+    value.includes("sigkill") ||
+    value.includes("epipe") ||
+    value.includes("broken pipe") ||
+    value.includes("command exited with code 141") ||
+    value.includes("command exited with code 137") ||
+    value.includes("exit code 141") ||
+    value.includes("exit code 137") ||
+    value.includes("process exited with code 141") ||
+    value.includes("process exited with code 137") ||
+    value.includes("process killed") ||
+    value.includes("killed session")
+  );
+}
+
 export function isBillingErrorMessage(raw: string): boolean {
   const value = raw.toLowerCase();
   if (!value) {
+    return false;
+  }
+  if (isLikelyLocalProcessTerminationError(value)) {
     return false;
   }
   if (matchesErrorPatterns(value, ERROR_PATTERNS.billing)) {
